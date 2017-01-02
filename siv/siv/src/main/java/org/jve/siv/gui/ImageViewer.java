@@ -6,6 +6,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 
@@ -14,7 +16,7 @@ public class ImageViewer extends JFrame{
 	private ImagePanel panel = null;
 	private JFrame frame = null;
 	
-	private ArrayList<File> images = null;
+	private Vector<File> images = null;
 	private int index = 0;
 	
 	private File tempDir = null;
@@ -48,7 +50,7 @@ public class ImageViewer extends JFrame{
     	pack();
     }
     
- /*   public void next()
+    public void next()
     {
     	if (images != null)
     	{
@@ -57,13 +59,13 @@ public class ImageViewer extends JFrame{
     		if (index == images.size())
     			index = 0;
     	}
-    }*/
+    }
     
- /*   public void showImages(ArrayList<File> images)
+    public void showImages(Vector<File> images)
     {
     	this.images = images;
     	next();
-    }*/
+    }
     
     // testing
     public static void main(String args[])
@@ -135,7 +137,7 @@ public class ImageViewer extends JFrame{
 	
 	private boolean loadImages()
 	{
-		this.images = new ArrayList<File>();
+		this.images = new Vector<File>();
 		File files[] = tempDir.listFiles();
 		
 		if (files == null)
@@ -157,7 +159,7 @@ public class ImageViewer extends JFrame{
 	}
 	
 	//private void next(File tempDir, boolean[] decoded) 
-	public void next()
+/*	public void next()
 	{
 	//	System.out.println("1 - next");
 		boolean imagesExist = loadImages();
@@ -190,7 +192,7 @@ public class ImageViewer extends JFrame{
 		}
 		
 	//	System.out.println("5 - next : fin");
-	}
+	}*/
 
 	public void showImages(File tempDir, boolean[] decoded) 
 	{

@@ -1,7 +1,12 @@
 package org.jve.siv.gui;
 
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -22,6 +27,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.jve.siv.engine.DecodeThread;
+import org.jve.siv.engine.SivCoder;
 import org.jve.siv.util.Logger;
 
 public class SivFrame extends JFrame {
@@ -35,6 +41,23 @@ public class SivFrame extends JFrame {
 	private JLabel pwdLabel = new JLabel(asterixmdp);
 	
 	private Logger logger; 
+	
+	private Rectangle bounds;
+	private boolean fullScreen = false;
+	
+	
+    private class MyDispatcher implements KeyEventDispatcher {
+        @Override
+        public boolean dispatchKeyEvent(KeyEvent e) {
+            if (e.getID() == KeyEvent.KEY_PRESSED) {
+            } else if (e.getID() == KeyEvent.KEY_RELEASED) {
+            } else if (e.getID() == KeyEvent.KEY_TYPED) {
+            	if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+            		setFullScreen(false);
+            }
+            return false;
+        }
+    }
 	
 	public SivFrame()
 	{
@@ -68,7 +91,7 @@ public class SivFrame extends JFrame {
 					if (!lastDirStr.equals(""))
 					{
 						lastDir = new File(lastDirStr);
-						System.out.println("LASTDIRSTR="+lastDirStr);
+						logger.info("LASTDIRSTR="+lastDirStr);
 					}
 			}
 			catch (FileNotFoundException e1) {
@@ -111,7 +134,11 @@ public class SivFrame extends JFrame {
 			}
 		};
 
+
 		addWindowListener(l);
+
+		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+	    manager.addKeyEventDispatcher(new MyDispatcher());
 
 		JPanel panneau = new JPanel();
 		
@@ -174,9 +201,21 @@ public class SivFrame extends JFrame {
 		}
 		);
 		
+		JButton boutonFs = new JButton("Full Screen");
+		boutonFs.addActionListener( new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				setFullScreen(!fullScreen);
+			}
+
+		}
+		);
+		
 		panneau.add(boutonImp);
 		panneau.add(boutonExp);
 		panneau.add(boutonView);
+		panneau.add(boutonFs);
 
 		setContentPane(panneau);
 		pack();
@@ -257,16 +296,20 @@ public class SivFrame extends JFrame {
 	
 	private void viewFiles() 
 	{
+	
+		logger.info("tenmpdir=["+tempDir+"]");
 		
-    	System.out.println("Deleting temp files...");
-    	File toDelete[] = tempDir.listFiles();
-    	for (int i=0; i<toDelete.length; i++)
-    		toDelete[i].delete();
-    	toDelete = tempDir.listFiles();
-    	for (int i=0; i<toDelete.length; i++)
-    		toDelete[i].delete();
-		//Tools.cleanDirectory(tempDir.getAbsolutePath());
-    	System.out.println("Temp files deleted...");
+		if (tempDir != null){
+			System.out.println("Deleting temp files...");
+			File toDelete[] = tempDir.listFiles();
+			for (int i=0; i<toDelete.length; i++)
+				toDelete[i].delete();
+			toDelete = tempDir.listFiles();
+			for (int i=0; i<toDelete.length; i++)
+				toDelete[i].delete();
+			//Tools.cleanDirectory(tempDir.getAbsolutePath());
+			logger.info("Temp files deleted...");
+		}
 		
 		if (mdp == null)
 		{
@@ -289,20 +332,22 @@ public class SivFrame extends JFrame {
     	Vector<File> files = new Vector<File>();
     	for (int i=0; i<filesArray.length;i++)
     	{
-    		if (ImageViewer.isImage(filesArray[i]))
+    		if (ImageViewer.isImage(filesArray[i])){
     			files.add(filesArray[i]);
+    			logger.info("Image found : ["+filesArray[i].getName()+"]");
+    		}
     	}
     	
-		/*for (int i=0; i<files.size(); i++)
+		for (int i=0; i<files.size(); i++)
 		{
     		SivCoder.decodeFile(mdp, files.get(i).getPath(), tempDir);
-    		System.out.println("Fichier ["+files.get(i).getPath()+"] decrypte");
+    		logger.info("Fichier ["+files.get(i).getPath()+"] decrypte");
 		}
     	
     	
 		
 		filesArray = tempDir.listFiles();
-    	files = new ArrayList<File>();
+    	files = new Vector<File>();
     	for (int i=0; i<filesArray.length;i++)
     	{
     		if (ImageViewer.isImage(filesArray[i]))
@@ -310,9 +355,9 @@ public class SivFrame extends JFrame {
     	}
 		
     	ImageViewer viewer = new ImageViewer();    	
-    	viewer.showImages(files);*/
+    	viewer.showImages(files);
     	
-    	DecodeThread decoder = new DecodeThread();
+    /*	DecodeThread decoder = new DecodeThread();
     	decoder.setDestDir(tempDir);
     	decoder.setFiles(files);
     	decoder.setPwd(mdp);
@@ -323,7 +368,7 @@ public class SivFrame extends JFrame {
     	decoder.start();
     	
     	viewer = new ImageViewer();    	
-    	viewer.showImages(tempDir, decoded);
+    	viewer.showImages(tempDir, decoded);*/
     	
     /*	try 
     	{
@@ -407,6 +452,22 @@ public class SivFrame extends JFrame {
 	public static void main(String args[])
 	{
 		new SivFrame();
+	}
+	
+	public void setFullScreen(boolean fs){
+		this.fullScreen = fs;
+		if (fs){
+			bounds = this.getBounds();
+			this.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+			this.setUndecorated(true);
+			this.setVisible(true);
+		}
+		else
+		{
+			this.setBounds(bounds);;
+			this.setUndecorated(false);
+			this.setVisible(true);
+		}
 	}
 
 }

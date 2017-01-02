@@ -37,12 +37,11 @@ public class Logger {
 	}
 	
 	private static boolean isDevelopment() {
-		/* try {
-			return new File(".").getCanonicalPath().contains("workspace");
+		 try {
+			return new File(".").getCanonicalPath().contains("Git");
 		} catch (IOException e) {
 			return false;
-		}*/
-		return false;
+		}
 	}
 
 	
